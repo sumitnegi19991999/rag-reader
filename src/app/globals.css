@@ -1,3 +1,487 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* High Contrast Minimalist Design System */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+:root {
+  /* Color Palette - High Contrast Black/White with Gray Accents */
+  --black: #000000;
+  --davys-gray: #494949;
+  --gray: #7c7a7a;
+  --white: #ffffff;
+
+  /* Theme Colors */
+  --background: var(--white);
+  --foreground: var(--black);
+  --card: var(--white);
+  --card-foreground: var(--black);
+  --primary: var(--black);
+  --primary-foreground: var(--white);
+  --secondary: var(--davys-gray);
+  --secondary-foreground: var(--white);
+  --muted: #fafafa;
+  --muted-foreground: var(--gray);
+  --accent: var(--gray);
+  --accent-foreground: var(--white);
+  --border: var(--gray);
+  --input: var(--white);
+  --ring: var(--black);
+
+  /* Typography */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+
+  /* Spacing & Layout */
+  --radius: 0px;
+
+  /* Minimal Shadows */
+  --shadow-minimal: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-accent: 0 2px 8px rgba(124, 122, 122, 0.15);
+
+  /* Borders */
+  --border-width: 1px;
+  --border-thick: 2px;
+  --border-style: solid;
+}
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans) !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  color: var(--foreground) !important;
+  background: var(--background) !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Panel Styles */
+.panel {
+  background: var(--card);
+  border: var(--border-thick) var(--border-style) var(--black);
+  padding: 2rem;
+  height: 100%;
+  position: relative;
+}
+
+/* Strategic Gray Accent Bars */
+.panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gray);
+}
+
+.panel:nth-child(2)::before {
+  background: var(--davys-gray);
+}
+
+.panel:nth-child(3)::before {
+  background: var(--black);
+}
+
+.panel-header {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding-bottom: 0.75rem;
+  border-bottom: var(--border-width) var(--border-style) var(--gray);
+  position: relative;
+}
+
+/* Gray accent dots for headers */
+.panel-header::after {
+  content: "●";
+  position: absolute;
+  right: 0;
+  top: 0;
+  color: var(--gray);
+  font-size: 0.75rem;
+}
+
+/* High Contrast Component Styles */
+.hc-input {
+  border: var(--border-width) var(--border-style) var(--gray) !important;
+  background: var(--white) !important;
+  color: var(--black) !important;
+  padding: 0.75rem !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.875rem !important;
+  border-radius: var(--radius) !important;
+  width: 100% !important;
+  transition: border-color 0.2s ease !important;
+}
+
+.hc-input:focus {
+  outline: none !important;
+  border-color: var(--black) !important;
+  box-shadow: 0 0 0 2px rgba(124, 122, 122, 0.2) !important;
+}
+
+.hc-input::placeholder {
+  color: var(--gray) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.025em !important;
+  font-size: 0.8125rem !important;
+}
+
+/* Button Styles */
+.hc-button {
+  background: var(--black) !important;
+  color: var(--white) !important;
+  border: none !important;
+  padding: 0.75rem 1.5rem !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+.hc-button:hover {
+  background: var(--davys-gray) !important;
+  transform: translateY(-1px) !important;
+}
+
+.hc-button:disabled {
+  background: var(--gray) !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.hc-button-secondary {
+  background: var(--white) !important;
+  color: var(--black) !important;
+  border: var(--border-thick) var(--border-style) var(--gray) !important;
+  padding: 0.75rem 1.5rem !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+.hc-button-secondary:hover {
+  background: var(--gray) !important;
+  color: var(--white) !important;
+  border-color: var(--gray) !important;
+}
+
+.hc-button-accent {
+  background: var(--gray) !important;
+  color: var(--white) !important;
+  padding: 0.75rem 1.5rem !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+.hc-button-accent:hover {
+  background: var(--davys-gray) !important;
+}
+
+/* Card Styles */
+.hc-card {
+  background: var(--white) !important;
+  border: var(--border-width) var(--border-style) var(--gray) !important;
+  padding: 1.5rem !important;
+  margin-bottom: 1rem !important;
+  position: relative !important;
+}
+
+.hc-card:nth-child(even) {
+  border-left: 4px solid var(--davys-gray) !important;
+}
+
+.hc-card:nth-child(odd) {
+  border-left: 4px solid var(--gray) !important;
+}
+
+.hc-card-header {
+  font-weight: 600 !important;
+  color: var(--black) !important;
+  margin-bottom: 1rem !important;
+  font-size: 1rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.025em !important;
+}
+
+/* Layout Grid */
+.three-panel-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  height: calc(100vh - 120px);
+  gap: 0;
+}
+
+.hc-header {
+  background: var(--black) !important;
+  color: var(--white) !important;
+  padding: 1rem 2rem !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  border-bottom: 4px solid var(--gray) !important;
+}
+
+.hc-header h1 {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: var(--white) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.15em !important;
+}
+
+.hc-header-nav {
+  display: flex !important;
+  gap: 2rem !important;
+  align-items: center !important;
+}
+
+.hc-header-nav span {
+  color: var(--gray) !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-size: 0.875rem !important;
+  cursor: pointer !important;
+  transition: color 0.2s ease !important;
+}
+
+.hc-header-nav span:hover {
+  color: var(--white) !important;
+}
+
+/* Upload Area */
+.hc-upload-area {
+  border: 2px dashed var(--gray) !important;
+  background: var(--muted) !important;
+  padding: 2rem !important;
+  text-align: center !important;
+  position: relative !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.hc-upload-area::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 8px !important;
+  left: 8px !important;
+  right: 8px !important;
+  bottom: 8px !important;
+  border: 1px dashed var(--davys-gray) !important;
+  pointer-events: none !important;
+}
+
+.hc-upload-area:hover {
+  background: var(--white) !important;
+  border-color: var(--black) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-accent) !important;
+}
+
+.hc-upload-area:hover::before {
+  border-color: var(--gray) !important;
+}
+
+/* Status Bar */
+.hc-status-bar {
+  background: var(--gray) !important;
+  color: var(--white) !important;
+  padding: 0.75rem 2rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.hc-status-bar span {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+.hc-status-bar span::before {
+  content: "■" !important;
+  color: var(--white) !important;
+  font-size: 0.5rem !important;
+}
+
+/* Chat Messages */
+.hc-chat-message {
+  margin-bottom: 1rem !important;
+  display: flex !important;
+  align-items: start !important;
+  gap: 0.75rem !important;
+}
+
+.hc-chat-message.user {
+  flex-direction: row-reverse !important;
+  text-align: right !important;
+}
+
+.hc-chat-message .avatar {
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 700 !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+.hc-chat-message.assistant .avatar {
+  background: var(--black) !important;
+  color: var(--white) !important;
+}
+
+.hc-chat-message.user .avatar {
+  background: var(--gray) !important;
+  color: var(--white) !important;
+}
+
+.hc-chat-message .content {
+  flex: 1 !important;
+  padding: 1rem !important;
+  border: var(--border-width) var(--border-style) var(--gray) !important;
+  background: var(--white) !important;
+  position: relative !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.025em !important;
+}
+
+.hc-chat-message.assistant .content {
+  border-left: 4px solid var(--black) !important;
+}
+
+.hc-chat-message.user .content {
+  border-right: 4px solid var(--davys-gray) !important;
+}
+
+/* Data Items */
+.hc-data-item {
+  padding: 0.75rem !important;
+  border-left: 3px solid var(--gray) !important;
+  margin-bottom: 0.5rem !important;
+  background: var(--muted) !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.hc-data-item:hover {
+  border-left-color: var(--black) !important;
+  background: var(--white) !important;
+  transform: translateX(4px) !important;
+}
+
+.hc-data-item.active {
+  border-left-color: var(--davys-gray) !important;
+  background: var(--white) !important;
+}
+
+.file-type-pdf {
+  border-left-color: var(--black) !important;
+}
+.file-type-txt {
+  border-left-color: var(--davys-gray) !important;
+}
+.file-type-csv {
+  border-left-color: var(--gray) !important;
+}
+.file-type-web {
+  border-left-color: var(--gray) !important;
+}
+
+/* Progress Bar */
+.hc-progress-container {
+  background: var(--gray) !important;
+  height: 4px !important;
+  overflow: hidden !important;
+  margin: 0.5rem 0 !important;
+}
+
+.hc-progress-bar {
+  background: linear-gradient(
+    90deg,
+    var(--black) 0%,
+    var(--davys-gray) 50%,
+    var(--gray) 100%
+  ) !important;
+  height: 100% !important;
+  transition: width 0.3s ease !important;
+  position: relative !important;
+}
+
+/* Delete Icon */
+.hc-delete-icon {
+  background: none !important;
+  border: none !important;
+  color: var(--gray) !important;
+  font-size: 0.875rem !important;
+  cursor: pointer !important;
+  padding: 0.25rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: color 0.2s ease, transform 0.2s ease !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+.hc-delete-icon:hover {
+  color: var(--black) !important;
+  transform: scale(1.1) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .three-panel-layout {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 1fr 1fr 1fr !important;
+    height: auto !important;
+  }
+
+  .panel {
+    padding: 1rem !important;
+  }
+
+  .hc-header {
+    padding: 1rem !important;
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .hc-header-nav {
+    gap: 1rem !important;
+  }
+}

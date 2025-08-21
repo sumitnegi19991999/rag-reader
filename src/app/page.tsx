@@ -5,35 +5,45 @@ import ChatInterface from '@/components/ChatInterface'
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            RAG Reader
-          </h1>
-          <p className="text-gray-600">
-            Retrieval Augmented Generation Application - Upload your data and chat with it
-          </p>
-        </header>
+    <>
+      {/* Header - Black background with gray accent */}
+      <div className="hc-header">
+        <h1>DATACHAT AI</h1>
+        <div className="hc-header-nav">
+          <span>PROFILE</span>
+          <span>SETTINGS</span>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Left Column - Data Input */}
-          <div className="space-y-6">
-            <DataSourceInput />
-            <FileUpload />
-          </div>
-
-          {/* Right Column - RAG Store */}
-          <div>
-            <RAGStore />
-          </div>
+      {/* Three Panel Layout */}
+      <div className="three-panel-layout">
+        {/* Panel 1: Data Sources - Gray accent bar */}
+        <div className="panel">
+          <h2 className="panel-header">DATA SOURCES</h2>
+          <DataSourceInput />
+          <FileUpload />
         </div>
 
-        {/* Chat Interface - Full Width */}
-        <div className="w-full">
+        {/* Panel 2: RAG Store - Davys-gray accent bar */}
+        <div className="panel">
+          <h2 className="panel-header">RAG STORE</h2>
+          <RAGStore />
+        </div>
+
+        {/* Panel 3: AI Chat - Black accent bar */}
+        <div className="panel">
+          <h2 className="panel-header">AI CHAT</h2>
           <ChatInterface />
         </div>
       </div>
-    </main>
+
+      {/* Status Bar - Gray background with strategic information */}
+      <div className="hc-status-bar">
+        <span>STATUS: OPERATIONAL</span>
+        <span>DOCUMENTS: 5</span>
+        <span>CHUNKS: 127</span>
+        <span>UPDATED: 2 MIN AGO</span>
+      </div>
+    </>
   )
 }

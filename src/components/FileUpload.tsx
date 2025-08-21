@@ -46,10 +46,10 @@ export default function FileUpload() {
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4">File Upload</h2>
+    <div className="hc-card">
+      <h3 className="hc-card-header">File Upload</h3>
       
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+      <div className="hc-upload-area mb-4">
         <input
           ref={fileInputRef}
           type="file"
@@ -59,35 +59,52 @@ export default function FileUpload() {
           className="hidden"
           id="file-upload"
         />
+        <div style={{fontSize: '2rem', color: 'var(--gray)', marginBottom: '0.5rem'}}>↑</div>
+        <p style={{marginBottom: '0.5rem', color: 'var(--black)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em'}}>Drop files here or</p>
         <label
           htmlFor="file-upload"
-          className="cursor-pointer inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          className="hc-button-secondary"
+          style={{cursor: 'pointer'}}
         >
-          {isUploading ? 'Uploading...' : 'Choose Files'}
+          {isUploading ? 'UPLOADING...' : 'CHOOSE FILES'}
         </label>
-        <p className="mt-2 text-sm text-gray-600">
-          Supported formats: PDF, CSV, TXT, DOC, DOCX
-        </p>
+        <p style={{fontSize: '0.75rem', color: 'var(--gray)', marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em'}}>PDF • TXT • CSV • DOC • DOCX</p>
       </div>
 
+      {/* Progress with color gradient */}
+      {isUploading && (
+        <div className="mb-4">
+          <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600}}>
+            <span style={{color: 'var(--black)'}}>UPLOADING...</span>
+            <span style={{color: 'var(--davys-gray)'}}>75%</span>
+          </div>
+          <div className="hc-progress-container">
+            <div className="hc-progress-bar" style={{width: '75%'}}></div>
+          </div>
+        </div>
+      )}
+
       {uploadedFiles.length > 0 && (
-        <div className="mt-4">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="font-medium">Uploaded Files:</h3>
+        <div>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem'}}>
+            <h4 style={{fontSize: '0.875rem', fontWeight: 600, color: 'var(--black)', textTransform: 'uppercase'}}>UPLOADED FILES:</h4>
             <button
               onClick={clearUploadedFiles}
-              className="text-sm text-red-600 hover:text-red-800"
+              className="hc-button-secondary"
+              style={{padding: '0.25rem 0.75rem', fontSize: '0.75rem'}}
             >
-              Clear All
+              CLEAR ALL
             </button>
           </div>
-          <ul className="space-y-1">
+          <div style={{maxHeight: '150px', overflowY: 'auto'}}>
             {uploadedFiles.map((fileName, index) => (
-              <li key={index} className="text-sm text-gray-700 bg-gray-100 px-3 py-1 rounded">
-                {fileName}
-              </li>
+              <div key={index} className="hc-data-item">
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                  <span style={{fontSize: '0.875rem', fontWeight: 600, color: 'var(--black)', textTransform: 'uppercase'}}>■ {fileName}</span>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
     </div>

@@ -48,15 +48,54 @@ export async function GET(request: NextRequest) {
     
     console.log(`📄 [DOCUMENTS-API] Retrieved ${searchResults.length} documents`);
 
-    // Transform documents to match frontend interface
-    const documents = searchResults.map((doc, index) => ({
-      id: doc.metadata.id || `doc-${index}`,
-      title: doc.metadata.title || doc.metadata.fileName || `Document ${index + 1}`,
-      type: doc.metadata.type || 'unknown',
-      content: doc.pageContent.substring(0, 200) + (doc.pageContent.length > 200 ? '...' : ''),
-      timestamp: doc.metadata.timestamp || new Date().toISOString(),
-      metadata: doc.metadata
-    }));
+    // Group chunks by source/document
+    const groupedDocs = new Map();
+    
+    searchResults.forEach(doc => {
+      const groupKey = doc.metadata.url || doc.metadata.fileName || doc.metadata.source || doc.metadata.title;
+      
+      if (!groupedDocs.has(groupKey)) {
+        groupedDocs.set(groupKey, {
+          id: doc.metadata.id?.split('-').slice(0, -1).join('-') || `doc-${groupKey}`,
+          title: doc.metadata.title || doc.metadata.fileName || `Document`,
+          type: doc.metadata.type || 'unknown',
+          content: '',
+          timestamp: doc.metadata.timestamp || new Date().toISOString(),
+          metadata: {
+            ...doc.metadata,
+            totalChunks: doc.metadata.totalChunks || 1,
+            source: groupKey
+          },
+          chunks: []
+        });
+      }
+      
+      const group = groupedDocs.get(groupKey);
+      group.chunks.push({
+        content: doc.pageContent,
+        chunkIndex: doc.metadata.chunkIndex || 0
+      });
+    });
+    
+    // Transform grouped documents to match frontend interface
+    const documents = Array.from(groupedDocs.values()).map(group => {
+      // Sort chunks by index and combine content
+      group.chunks.sort((a: any, b: any) => a.chunkIndex - b.chunkIndex);
+      const combinedContent = group.chunks.map((chunk: any) => chunk.content).join(' ');
+      
+      return {
+        id: group.id,
+        title: group.title,
+        type: group.type,
+        content: combinedContent.substring(0, 300) + (combinedContent.length > 300 ? '...' : ''),
+        timestamp: group.timestamp,
+        metadata: {
+          ...group.metadata,
+          chunksCount: group.chunks.length,
+          fullContent: combinedContent
+        }
+      };
+    });
 
     const processingTime = Date.now() - startTime;
     console.log(`✅ [DOCUMENTS-API] Successfully fetched documents in ${processingTime}ms`);

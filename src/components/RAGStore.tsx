@@ -8,6 +8,10 @@ interface Document {
   type: "text" | "file" | "website";
   content: string;
   timestamp: string;
+  metadata?: {
+    chunksCount?: number;
+    [key: string]: any;
+  };
 }
 
 export default function RAGStore() {
@@ -26,6 +30,7 @@ export default function RAGStore() {
       const response = await fetch("/api/documents");
       if (response.ok) {
         const data = await response.json();
+        console.log(data.documents);
         setDocuments(data.documents || []);
       }
     } catch (error) {
@@ -37,7 +42,6 @@ export default function RAGStore() {
 
   const deleteDocument = async (id: string) => {
     try {
-      // TODO: Implement API call to delete document
       const response = await fetch(`/api/documents/${id}`, {
         method: "DELETE",
       });
@@ -70,79 +74,93 @@ export default function RAGStore() {
   );
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">RAG Store</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={fetchDocuments}
-            className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
-          >
-            Refresh
-          </button>
-          <button
-            onClick={clearAllDocuments}
-            className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm"
-          >
-            Clear All
-          </button>
+    <>
+      {/* Search Section */}
+      <div className="hc-card">
+        <div style={{position: 'relative'}}>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search chunks..."
+            className="hc-input"
+            style={{paddingLeft: '2.5rem'}}
+          />
+          <span style={{position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--gray)', fontWeight: 700}}>⚔</span>
         </div>
       </div>
 
-      <div className="mb-4">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search documents..."
-          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
-      </div>
-
-      <div className="text-sm text-gray-600 mb-3">
-        Total Documents: {documents.length}
-      </div>
-
-      {isLoading ? (
-        <div className="text-center py-4">Loading documents...</div>
-      ) : filteredDocuments.length === 0 ? (
-        <div className="text-center py-4 text-gray-500">
-          {documents.length === 0
-            ? "No documents stored yet"
-            : "No documents match your search"}
-        </div>
-      ) : (
-        <div className="space-y-3 max-h-60 overflow-y-auto">
-          {filteredDocuments.map((doc) => (
-            <div key={doc.id} className="border border-gray-200 rounded-md p-3">
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex-1">
-                  <h3 className="font-medium text-sm">{doc.title}</h3>
-                  <span
-                    className={`inline-block px-2 py-1 rounded text-xs ${
-                      doc.type === "text"
-                        ? "bg-blue-100 text-blue-800"
-                        : doc.type === "file"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-purple-100 text-purple-800"
-                    }`}
-                  >
-                    {doc.type}
-                  </span>
+      {/* Stored Data with strategic color coding */}
+      <div className="hc-card">
+        <h3 className="hc-card-header">Stored Documents</h3>
+        
+        {isLoading ? (
+          <div style={{textAlign: 'center', padding: '1rem', color: 'var(--gray)', textTransform: 'uppercase'}}>LOADING DOCUMENTS...</div>
+        ) : filteredDocuments.length === 0 ? (
+          <div style={{textAlign: 'center', padding: '1rem', color: 'var(--gray)', textTransform: 'uppercase'}}>
+            {documents.length === 0
+              ? "NO DOCUMENTS STORED YET"
+              : "NO DOCUMENTS MATCH YOUR SEARCH"}
+          </div>
+        ) : (
+          <div style={{maxHeight: '300px', overflowY: 'auto'}}>
+            {filteredDocuments.map((doc, index) => {
+              const fileTypeClass = doc.type === 'file' && doc.title.endsWith('.pdf') ? 'file-type-pdf' : 
+                                   doc.type === 'text' ? 'file-type-txt' : 
+                                   doc.type === 'website' ? 'file-type-web' : 'file-type-csv';
+              
+              return (
+                <div key={doc.id} className={`hc-data-item ${fileTypeClass} ${index === 0 ? 'active' : ''}`}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem'}}>
+                    <h4 style={{fontSize: '0.875rem', fontWeight: 600, color: 'var(--black)', textTransform: 'uppercase'}}>■ {doc.title.toUpperCase()}</h4>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
+                      <span style={{fontSize: '0.75rem', color: 'var(--gray)', textTransform: 'uppercase'}}>{doc.metadata?.chunksCount || 1} CHUNKS</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteDocument(doc.id);
+                        }}
+                        className="hc-delete-icon"
+                        title="DELETE DOCUMENT"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                  <div style={{fontSize: '0.8125rem', color: 'var(--davys-gray)', textTransform: 'uppercase', letterSpacing: '0.025em'}}>
+                    {doc.type === 'text' ? 'TEXT CONTENT • USER INPUT' : 
+                     doc.type === 'file' ? 'FILE CONTENT • PROCESSED DOCUMENT' :
+                     'WEB CONTENT • SCRAPED DATA'}
+                  </div>
+                  {doc.content && (
+                    <div style={{fontSize: '0.75rem', color: 'var(--gray)', marginTop: '0.5rem', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+                      {doc.content.substring(0, 50)}...
+                    </div>
+                  )}
                 </div>
-                <button
-                  onClick={() => deleteDocument(doc.id)}
-                  className="text-red-600 hover:text-red-800 text-sm"
-                >
-                  Delete
-                </button>
-              </div>
-              <p className="text-sm text-gray-700 truncate">{doc.content}</p>
-              <p className="text-xs text-gray-500 mt-1">{doc.timestamp}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Management Actions */}
+      <div style={{display: 'flex', gap: '0.5rem'}}>
+        <button
+          onClick={clearAllDocuments}
+          className="hc-button-secondary"
+          style={{flex: 1}}
+        >
+          DELETE
+        </button>
+        <button
+          onClick={fetchDocuments}
+          className="hc-button-secondary"
+          style={{flex: 1}}
+        >
+          EXPORT
+        </button>
+      </div>
+    </>
   );
 }

@@ -1,96 +1,95 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
+import { useState } from "react";
 
 export default function DataSourceInput() {
-  const [textData, setTextData] = useState('')
-  const [websiteUrl, setWebsiteUrl] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [textData, setTextData] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleTextSubmit = async () => {
-    if (!textData.trim()) return
-    
-    setIsLoading(true)
+    if (!textData.trim()) return;
+
+    setIsLoading(true);
     try {
       // TODO: Implement API call to store text data
-      const response = await fetch('/api/data/text', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: textData })
-      })
+      const response = await fetch("/api/data/text", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: textData }),
+      });
       // Handle response
-      console.log('Text data stored')
-      setTextData('')
+      console.log("Text data stored");
+      setTextData("");
     } catch (error) {
-      console.error('Error storing text data:', error)
+      console.error("Error storing text data:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleWebsiteSubmit = async () => {
-    if (!websiteUrl.trim()) return
-    
-    setIsLoading(true)
+    if (!websiteUrl.trim()) return;
+
+    setIsLoading(true);
     try {
       // TODO: Implement API call to fetch and store website data
-      const response = await fetch('/api/data/website', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: websiteUrl })
-      })
+      const response = await fetch("/api/data/website", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: websiteUrl }),
+      });
       // Handle response
-      console.log('Website data stored')
-      setWebsiteUrl('')
+      console.log("Website data stored");
+      setWebsiteUrl("");
     } catch (error) {
-      console.error('Error storing website data:', error)
+      console.error("Error storing website data:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4">Data Sources</h2>
-      
-      {/* Text Input */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-2">Text Data</label>
+    <>
+      {/* Text Input Section */}
+      <div className="hc-card">
+        <h3 className="hc-card-header">Text Input</h3>
         <textarea
           value={textData}
           onChange={(e) => setTextData(e.target.value)}
-          placeholder="Enter your text data here..."
-          className="w-full h-32 p-3 border border-gray-300 rounded-md resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Paste or type your text content here..."
+          rows={4}
+          className="hc-input mb-4"
         />
         <button
           onClick={handleTextSubmit}
           disabled={!textData.trim() || isLoading}
-          className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+          className="hc-button"
         >
-          {isLoading ? 'Processing...' : 'Add Text Data'}
+          {isLoading ? "PROCESSING..." : "PROCESS TEXT"}
         </button>
       </div>
 
-      {/* Website URL Input */}
-      <div>
-        <label className="block text-sm font-medium mb-2">Website URL</label>
-        <div className="flex gap-2">
+      {/* Website Scraper Section */}
+      <div className="hc-card">
+        <h3 className="hc-card-header">Website Scraper</h3>
+        <div className="mb-4">
           <input
             type="url"
             value={websiteUrl}
             onChange={(e) => setWebsiteUrl(e.target.value)}
-            placeholder="https://example.com"
-            className="flex-1 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="https://example.com/article"
+            className="hc-input mb-4"
           />
-          <button
-            onClick={handleWebsiteSubmit}
-            disabled={!websiteUrl.trim() || isLoading}
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400"
-          >
-            {isLoading ? 'Fetching...' : 'Add Website'}
-          </button>
         </div>
+        <button
+          onClick={handleWebsiteSubmit}
+          disabled={!websiteUrl.trim() || isLoading}
+          className="hc-button-accent"
+        >
+          {isLoading ? "SCRAPING..." : "SCRAPE WEBSITE"}
+        </button>
       </div>
-    </div>
-  )
+    </>
+  );
 }

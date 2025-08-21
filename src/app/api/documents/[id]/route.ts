@@ -51,18 +51,47 @@ export async function DELETE(
       );
     }
 
-    // Delete the document by ID
+    // Find all chunk IDs for this grouped document
+    console.log(`🔍 [DELETE-DOC-API] Searching for chunks with prefix: ${id}`);
+    
+    // Search for documents with similar content to find all related chunks
+    const searchResults = await vectorStore.similaritySearch(
+      "document content data text information", // General query
+      100 // Get more results to find all chunks
+    );
+    
+    // Filter chunks that belong to this grouped document
+    const chunksToDelete = searchResults
+      .filter(doc => {
+        const docId = doc.metadata.id || '';
+        // Check if this chunk belongs to the grouped document
+        return docId.startsWith(id + '-') || docId === id;
+      })
+      .map(doc => doc.metadata.id)
+      .filter(Boolean);
+    
+    console.log(`🗑️ [DELETE-DOC-API] Found ${chunksToDelete.length} chunks to delete:`, chunksToDelete);
+    
+    if (chunksToDelete.length === 0) {
+      console.log(`⚠️ [DELETE-DOC-API] No chunks found for document: ${id}`);
+      return NextResponse.json(
+        { success: false, error: 'Document not found' },
+        { status: 404 }
+      );
+    }
+    
+    // Delete all found chunks
     try {
-      await vectorStore.delete({ ids: [id] });
-      console.log(`✅ [DELETE-DOC-API] Successfully deleted document: ${id}`);
+      await vectorStore.delete({ ids: chunksToDelete });
+      console.log(`✅ [DELETE-DOC-API] Successfully deleted ${chunksToDelete.length} chunks for document: ${id}`);
     } catch (deleteError) {
-      console.error(`❌ [DELETE-DOC-API] Error deleting document ${id}:`, deleteError);
+      console.error(`❌ [DELETE-DOC-API] Error deleting chunks for ${id}:`, deleteError);
       
       // Check if it's a "not found" type error
       const errorMessage = deleteError instanceof Error ? deleteError.message : String(deleteError);
       if (errorMessage.toLowerCase().includes('not found') || errorMessage.toLowerCase().includes('not exist')) {
         return NextResponse.json(
-          { success: false, error: 'Document not found' },
+          { success: false, error: 'Document chunks not found' },
           { status: 404 }
         );
       }
@@ -75,8 +104,9 @@ export async function DELETE(
     
     return NextResponse.json({ 
       success: true, 
-      message: `Document ${id} deleted successfully`,
+      message: `Document ${id} deleted successfully (${chunksToDelete.length} chunks)`,
       deletedId: id,
+      deletedChunks: chunksToDelete.length,
       processingTimeMs: processingTime
     });
   } catch (error) {
