@@ -73,19 +73,17 @@ export default function DataSourceInput() {
       {/* Website Scraper Section */}
       <div className="hc-card">
         <h3 className="hc-card-header">Website Scraper</h3>
-        <div className="mb-4">
-          <input
-            type="url"
-            value={websiteUrl}
-            onChange={(e) => setWebsiteUrl(e.target.value)}
-            placeholder="https://example.com/article"
-            className="hc-input mb-4"
-          />
-        </div>
+        <input
+          type="url"
+          value={websiteUrl}
+          onChange={(e) => setWebsiteUrl(e.target.value)}
+          placeholder="https://example.com/article"
+          className="hc-input mb-4"
+        />
         <button
           onClick={handleWebsiteSubmit}
           disabled={!websiteUrl.trim() || isLoading}
-          className="hc-button-accent"
+          className="hc-button-accent mt-2"
         >
           {isLoading ? "SCRAPING..." : "SCRAPE WEBSITE"}
         </button>

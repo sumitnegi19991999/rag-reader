@@ -66,6 +66,9 @@ body {
   padding: 2rem;
   height: 100%;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Strategic Gray Accent Bars */
@@ -107,6 +110,31 @@ body {
   top: 0;
   color: var(--gray);
   font-size: 0.75rem;
+}
+
+/* Panel Content Scrolling */
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.panel-content::-webkit-scrollbar-track {
+  background: var(--muted);
+}
+
+.panel-content::-webkit-scrollbar-thumb {
+  background: var(--gray);
+  border-radius: 0;
+}
+
+.panel-content::-webkit-scrollbar-thumb:hover {
+  background: var(--davys-gray);
 }
 
 /* High Contrast Component Styles */

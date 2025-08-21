@@ -91,12 +91,12 @@ export default function ChatInterface() {
   };
 
   return (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Chat Messages */}
       <div
         style={{
-          height: "60%",
-          overflowY: "scroll",
+          flex: 1,
+          overflowY: "auto",
           marginBottom: "1rem",
           padding: "0.5rem",
         }}
@@ -189,6 +189,6 @@ export default function ChatInterface() {
           SEND
         </button>
       </div>
-    </>
+    </div>
   );
 }
