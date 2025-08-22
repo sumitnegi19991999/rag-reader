@@ -10,8 +10,13 @@ export default function Home() {
       <div className="hc-header">
         <h1>DATACHAT AI</h1>
         <div className="hc-header-nav">
-          <span>PROFILE</span>
-          <span>SETTINGS</span>
+          <a
+            target="_blank"
+            href="https://x.com/Sumitne87999784"
+            rel="noopener noreferrer"
+          >
+            <span>Contact Me</span>
+          </a>
         </div>
       </div>
 

@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useToast } from "@/contexts/ToastContext";
 
 export default function FileUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { showToast } = useToast();
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -14,13 +16,22 @@ export default function FileUpload() {
     if (!files || files.length === 0) return;
 
     setIsUploading(true);
+    const fileList = Array.from(files);
+    let successCount = 0;
+    let failureCount = 0;
+
+    showToast(
+      "info",
+      "Upload Started",
+      `Processing ${fileList.length} file${fileList.length > 1 ? "s" : ""}`,
+      { duration: 3000 }
+    );
 
     try {
-      for (const file of Array.from(files)) {
+      for (const file of fileList) {
         const formData = new FormData();
         formData.append("file", file);
 
-        // TODO: Implement API call to upload and process file
         const response = await fetch("/api/data/upload", {
           method: "POST",
           body: formData,
@@ -28,13 +39,52 @@ export default function FileUpload() {
 
         if (response.ok) {
           setUploadedFiles((prev) => [...prev, file.name]);
+          successCount++;
           console.log(`File ${file.name} uploaded successfully`);
         } else {
+          failureCount++;
           console.error(`Failed to upload ${file.name}`);
         }
       }
+
+      // Show completion toast
+      if (successCount > 0 && failureCount === 0) {
+        showToast(
+          "success",
+          "Upload Complete",
+          `Successfully processed ${successCount} file${successCount > 1 ? "s" : ""} and added to knowledge base`,
+          {
+            action: {
+              label: "View",
+              action: () => {
+                showToast("info", "Navigation", "Switch to RAG Store to view uploaded documents");
+              },
+            },
+            duration: 6000,
+          }
+        );
+      } else if (successCount > 0 && failureCount > 0) {
+        showToast(
+          "info",
+          "Partial Success",
+          `${successCount} files uploaded successfully, ${failureCount} failed`,
+          { duration: 5000 }
+        );
+      } else if (failureCount > 0) {
+        showToast(
+          "error",
+          "Upload Failed",
+          `Failed to process ${failureCount} file${failureCount > 1 ? "s" : ""}. Please try again`,
+          { duration: 5000 }
+        );
+      }
     } catch (error) {
       console.error("Error uploading files:", error);
+      showToast(
+        "error",
+        "Upload Error",
+        "Connection error occurred during file upload. Please check your connection and try again"
+      );
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -44,7 +94,14 @@ export default function FileUpload() {
   };
 
   const clearUploadedFiles = () => {
+    const count = uploadedFiles.length;
     setUploadedFiles([]);
+    showToast(
+      "info",
+      "Files Cleared",
+      `Removed ${count} file${count > 1 ? "s" : ""} from upload list`,
+      { duration: 3000 }
+    );
   };
 
   return (

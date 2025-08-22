@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import ConfirmationModal from "./ConfirmationModal";
+import { useToast } from "@/contexts/ToastContext";
 
 interface Document {
   id: string;
@@ -18,52 +20,167 @@ export default function RAGStore() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    document?: Document;
+    type: "single" | "all";
+  }>({ isOpen: false, type: "single" });
+
+  const { showToast } = useToast();
 
   useEffect(() => {
     fetchDocuments();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchDocuments = async () => {
     setIsLoading(true);
     try {
-      // TODO: Implement API call to fetch stored documents
       const response = await fetch("/api/documents");
       if (response.ok) {
         const data = await response.json();
         console.log(data.documents);
         setDocuments(data.documents || []);
+
+        // Show info toast on successful refresh
+        if (data.documents && data.documents.length > 0) {
+          showToast(
+            "info",
+            "Documents Refreshed",
+            `Found ${data.documents.length} documents in your knowledge base`,
+            { duration: 3000 }
+          );
+        }
+      } else {
+        showToast(
+          "error",
+          "Refresh Failed",
+          "Unable to fetch documents from the server"
+        );
       }
     } catch (error) {
       console.error("Error fetching documents:", error);
+      showToast(
+        "error",
+        "Connection Error",
+        "Failed to connect to the document server"
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const deleteDocument = async (id: string) => {
+  const openDeleteModal = (document: Document) => {
+    setDeleteModal({
+      isOpen: true,
+      document,
+      type: "single",
+    });
+  };
+
+  const openClearAllModal = () => {
+    setDeleteModal({
+      isOpen: true,
+      type: "all",
+    });
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModal({ isOpen: false, type: "single" });
+  };
+
+  const handleConfirmDelete = async () => {
     try {
-      const response = await fetch(`/api/documents/${id}`, {
-        method: "DELETE",
-      });
-      if (response.ok) {
-        setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+      if (deleteModal.type === "single" && deleteModal.document) {
+        const response = await fetch(
+          `/api/documents/${deleteModal.document.id}`,
+          {
+            method: "DELETE",
+          }
+        );
+        if (response.ok) {
+          setDocuments((prev) =>
+            prev.filter((doc) => doc.id !== deleteModal.document!.id)
+          );
+          const chunkCount = deleteModal.document.metadata?.totalChunks || 1;
+          showToast(
+            "success",
+            "Document Deleted",
+            `${deleteModal.document.title} and ${chunkCount} chunks removed successfully`,
+            {
+              action: {
+                label: "Undo",
+                action: () => {
+                  showToast(
+                    "info",
+                    "Undo Requested",
+                    "Restore functionality coming soon"
+                  );
+                },
+              },
+            }
+          );
+        } else {
+          showToast(
+            "error",
+            "Delete Failed",
+            "Unable to delete document from the database"
+          );
+        }
+      } else if (deleteModal.type === "all") {
+        const response = await fetch("/api/documents", {
+          method: "DELETE",
+        });
+        if (response.ok) {
+          const deletedCount = documents.length;
+          setDocuments([]);
+          showToast(
+            "success",
+            "All Documents Cleared",
+            `Successfully removed ${deletedCount} documents from your knowledge base`,
+            {
+              duration: 6000,
+            }
+          );
+        } else {
+          showToast(
+            "error",
+            "Clear Failed",
+            "Unable to clear all documents from the database"
+          );
+        }
       }
     } catch (error) {
-      console.error("Error deleting document:", error);
+      console.error("Error deleting:", error);
+      showToast(
+        "error",
+        "System Error",
+        "An unexpected error occurred during deletion"
+      );
+    } finally {
+      closeDeleteModal();
     }
   };
 
-  const clearAllDocuments = async () => {
-    try {
-      // TODO: Implement API call to clear all documents
-      const response = await fetch("/api/documents", {
-        method: "DELETE",
-      });
-      if (response.ok) {
-        setDocuments([]);
-      }
-    } catch (error) {
-      console.error("Error clearing documents:", error);
+  const getModalProps = () => {
+    if (deleteModal.type === "single" && deleteModal.document) {
+      const doc = deleteModal.document;
+      const chunkCount = doc.metadata?.totalChunks || 1;
+      return {
+        title: doc.title,
+        type:
+          doc.type === "text"
+            ? "Text Content"
+            : doc.type === "file"
+            ? "File Content"
+            : "Web Content",
+        detail: `${chunkCount} chunks containing document data will be permanently removed. This action cannot be undone.`,
+      };
+    } else {
+      return {
+        title: "All Documents",
+        type: "Complete Database",
+        detail: `${documents.length} documents and all their chunks will be permanently removed. This action cannot be undone.`,
+      };
     }
   };
 
@@ -173,7 +290,7 @@ export default function RAGStore() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          deleteDocument(doc.id);
+                          openDeleteModal(doc);
                         }}
                         className="hc-delete-icon"
                         title="DELETE DOCUMENT"
@@ -221,7 +338,7 @@ export default function RAGStore() {
       {/* Management Actions */}
       <div style={{ display: "flex", gap: "0.5rem" }}>
         <button
-          onClick={clearAllDocuments}
+          onClick={openClearAllModal}
           className="hc-button-secondary"
           style={{ flex: 1 }}
         >
@@ -235,6 +352,14 @@ export default function RAGStore() {
           REFRESH
         </button>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleConfirmDelete}
+        {...getModalProps()}
+      />
     </>
   );
 }
