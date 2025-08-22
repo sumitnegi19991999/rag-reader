@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { QdrantVectorStore } from '@langchain/qdrant';
 import { OpenAIEmbeddings } from '@langchain/openai';
+import { createQdrantVectorStore } from '@/lib/qdrant';
 
 export async function DELETE(
   request: NextRequest,
@@ -34,15 +34,9 @@ export async function DELETE(
       model: 'text-embedding-3-large',
     });
 
-    let vectorStore: QdrantVectorStore;
+    let vectorStore;
     try {
-      vectorStore = await QdrantVectorStore.fromExistingCollection(
-        embeddings,
-        {
-          url: process.env.QDRANT_URL || 'http://localhost:6333',
-          collectionName: process.env.QDRANT_COLLECTION || 'chaicode-collection',
-        }
-      );
+      vectorStore = await createQdrantVectorStore(embeddings);
     } catch (vectorError) {
       console.error('❌ [DELETE-DOC-API] Failed to connect to vector store:', vectorError);
       return NextResponse.json(

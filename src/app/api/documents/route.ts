@@ -1,7 +1,6 @@
 import { OpenAIEmbeddings } from '@langchain/openai';
-import { QdrantVectorStore } from '@langchain/qdrant';
-import { NextRequest, NextResponse } from 'next/server'
-import { QdrantClient } from '@qdrant/js-client-rest';
+import { NextRequest, NextResponse } from 'next/server';
+import { createQdrantVectorStore, createQdrantClient, getQdrantConfig } from '@/lib/qdrant';
 
 
 export async function GET(request: NextRequest) {
@@ -23,15 +22,9 @@ export async function GET(request: NextRequest) {
       model: 'text-embedding-3-large',
     });
 
-    let vectorStore: QdrantVectorStore;
+    let vectorStore;
     try {
-      vectorStore = await QdrantVectorStore.fromExistingCollection(
-        embeddings,
-        {
-          url: process.env.QDRANT_URL || 'http://localhost:6333',
-          collectionName: process.env.QDRANT_COLLECTION || 'chaicode-collection',
-        }
-      );
+      vectorStore = await createQdrantVectorStore(embeddings);
     } catch (vectorError) {
       console.error('❌ [DOCUMENTS-API] Failed to connect to vector store:', vectorError);
       return NextResponse.json({
@@ -141,15 +134,9 @@ export async function DELETE(request: NextRequest) {
       model: 'text-embedding-3-large',
     });
 
-    let vectorStore: QdrantVectorStore;
+    let vectorStore;
     try {
-      vectorStore = await QdrantVectorStore.fromExistingCollection(
-        embeddings,
-        {
-          url: process.env.QDRANT_URL || 'http://localhost:6333',
-          collectionName: process.env.QDRANT_COLLECTION || 'chaicode-collection',
-        }
-      );
+      vectorStore = await createQdrantVectorStore(embeddings);
     } catch (vectorError) {
       console.log('⚠️ [DOCUMENTS-API] Vector store not found or empty, nothing to clear');
       return NextResponse.json({ 
@@ -159,14 +146,10 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Clear the entire collection by deleting and recreating it
-    // Note: QdrantVectorStore doesn't have a direct "clear all" method,
-    // so we use the delete method without parameters to clear everything
     try {
-      const qdrantClient = new QdrantClient({
-        url: process.env.QDRANT_URL || 'http://localhost:6333',
-      });
-      
-      const collectionName = process.env.QDRANT_COLLECTION || 'chaicode-collection';
+      const qdrantClient = createQdrantClient();
+      const config = getQdrantConfig();
+      const collectionName = config.collectionName;
       
       // Delete points using the correct Qdrant API format
       const deleteResult = await qdrantClient.deleteCollection(collectionName);

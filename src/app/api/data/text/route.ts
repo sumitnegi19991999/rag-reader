@@ -3,6 +3,7 @@ import { OpenAIEmbeddings } from '@langchain/openai';
 import { QdrantVectorStore } from '@langchain/qdrant';
 import { Document } from 'langchain/document';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { getQdrantConfig } from '@/lib/qdrant';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -75,10 +76,15 @@ export async function POST(request: NextRequest) {
     });
 
     console.log('🔗 [TEXT-API] Connecting to Qdrant vector store...');
-    const vectorStore = await QdrantVectorStore.fromDocuments(docs, embeddings, {
-      url: process.env.QDRANT_URL || 'http://localhost:6333',
-      collectionName: process.env.QDRANT_COLLECTION || 'chaicode-collection',
-    });
+    const config = getQdrantConfig();
+    const qdrantConfig: any = {
+      url: config.url,
+      collectionName: config.collectionName,
+    };
+    if (config.apiKey) {
+      qdrantConfig.apiKey = config.apiKey;
+    }
+    await QdrantVectorStore.fromDocuments(docs, embeddings, qdrantConfig);
 
     const processingTime = Date.now() - startTime;
     console.log(`✅ [TEXT-API] Successfully processed text in ${processingTime}ms`);

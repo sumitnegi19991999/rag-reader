@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { OpenAIEmbeddings } from '@langchain/openai';
-import { QdrantVectorStore } from '@langchain/qdrant';
 import OpenAI from 'openai';
+import { createQdrantVectorStore } from '@/lib/qdrant';
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,13 +53,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Connect to vector store and search for relevant documents
-    const vectorStore = await QdrantVectorStore.fromExistingCollection(
-      embeddings,
-      {
-        url: process.env.QDRANT_URL || 'http://localhost:6333',
-        collectionName: process.env.QDRANT_COLLECTION || 'chaicode-collection',
-      }
-    );
+    const vectorStore = await createQdrantVectorStore(embeddings);
     
     const relevantDocs = await vectorStore.similaritySearch(message, 5);
     console.log(`Found ${relevantDocs.length} relevant documents`);

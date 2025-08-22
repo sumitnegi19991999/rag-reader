@@ -6,6 +6,7 @@ import { OpenAIEmbeddings } from '@langchain/openai';
 import { QdrantVectorStore } from '@langchain/qdrant';
 import { Document } from 'langchain/document';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { getQdrantConfig } from '@/lib/qdrant';
 
 // File size limits (in bytes)
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -165,10 +166,15 @@ export async function POST(request: NextRequest) {
     });
 
     console.log('🔗 [UPLOAD-API] Storing documents in vector database...');
-    const vectorStore = await QdrantVectorStore.fromDocuments(processedDocs, embeddings, {
-      url: process.env.QDRANT_URL || 'http://localhost:6333',
-      collectionName: process.env.QDRANT_COLLECTION || 'chaicode-collection',
-    });
+    const config = getQdrantConfig();
+    const qdrantConfig: any = {
+      url: config.url,
+      collectionName: config.collectionName,
+    };
+    if (config.apiKey) {
+      qdrantConfig.apiKey = config.apiKey;
+    }
+    await QdrantVectorStore.fromDocuments(processedDocs, embeddings, qdrantConfig);
 
     const processingTime = Date.now() - startTime;
     console.log(`✅ [UPLOAD-API] Successfully processed file in ${processingTime}ms`);
