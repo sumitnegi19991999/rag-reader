@@ -20,6 +20,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate text length (max 100KB)
+    if (text.length > 100000) {
+      console.log('❌ [TEXT-API] Text too long');
+      return NextResponse.json(
+        { success: false, error: 'Text too long. Maximum 100,000 characters allowed.' },
+        { status: 400 }
+      );
+    }
+
+    // Basic sanitization - remove potentially dangerous content
+    const sanitizedText = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                              .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+                              .replace(/javascript:/gi, '');
+
     console.log(`📊 [TEXT-API] Processing text (${text.length} characters): ${text.substring(0, 100)}...`);
 
     // Validate environment variables
@@ -37,7 +51,7 @@ export async function POST(request: NextRequest) {
       chunkOverlap: 200,
     });
     
-    const splitTexts = await textSplitter.splitText(text);
+    const splitTexts = await textSplitter.splitText(sanitizedText);
     console.log(`📄 [TEXT-API] Split text into ${splitTexts.length} chunks`);
 
     // Create documents with metadata
