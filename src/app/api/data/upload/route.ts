@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
           throw new Error(`Unsupported file extension: ${fileExtension}`);
       }
 
-      console.log(`📄 [UPLOAD-API] Extracted ${docs.length} documents from file`);
+      console.log(`📄 [UPLOAD-API] Extracted ${docs.length} documents from file`,docs);
       
       if (docs.length === 0) {
         console.log('⚠️ [UPLOAD-API] No content extracted from file');

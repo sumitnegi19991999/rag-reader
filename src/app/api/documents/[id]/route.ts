@@ -59,7 +59,6 @@ export async function DELETE(
       "document content data text information", // General query
       100 // Get more results to find all chunks
     );
-    
     // Filter chunks that belong to this grouped document
     const chunksToDelete = searchResults
       .filter(doc => {
@@ -67,8 +66,8 @@ export async function DELETE(
         // Check if this chunk belongs to the grouped document
         return docId.startsWith(id + '-') || docId === id;
       })
-      .map(doc => doc.metadata.id)
-      .filter(Boolean);
+      .map(doc => doc.id)
+      .filter((docId): docId is string => docId !== undefined && docId !== null);
     
     console.log(`🗑️ [DELETE-DOC-API] Found ${chunksToDelete.length} chunks to delete:`, chunksToDelete);
     

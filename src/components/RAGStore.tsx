@@ -168,7 +168,7 @@ export default function RAGStore() {
                           textTransform: "uppercase",
                         }}
                       >
-                        {doc.metadata?.chunksCount || 1} CHUNKS
+                        {doc.metadata?.totalChunks || 1} CHUNKS
                       </span>
                       <button
                         onClick={(e) => {

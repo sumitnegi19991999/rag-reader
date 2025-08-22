@@ -1,6 +1,8 @@
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { QdrantVectorStore } from '@langchain/qdrant';
 import { NextRequest, NextResponse } from 'next/server'
+import { QdrantClient } from '@qdrant/js-client-rest';
+
 
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
@@ -45,7 +47,6 @@ export async function GET(request: NextRequest) {
       "document content data text information", // General query to match various content
       50 // Limit to reasonable number
     );
-    
     console.log(`📄 [DOCUMENTS-API] Retrieved ${searchResults.length} documents`);
 
     // Group chunks by source/document
@@ -161,9 +162,19 @@ export async function DELETE(request: NextRequest) {
     // Note: QdrantVectorStore doesn't have a direct "clear all" method,
     // so we use the delete method without parameters to clear everything
     try {
-      await vectorStore.delete;
-      console.log('✅ [DOCUMENTS-API] Successfully cleared vector store');
-    } catch (deleteError) {
+      const qdrantClient = new QdrantClient({
+        url: process.env.QDRANT_URL || 'http://localhost:6333',
+      });
+      
+      const collectionName = process.env.QDRANT_COLLECTION || 'chaicode-collection';
+      
+      // Delete points using the correct Qdrant API format
+      const deleteResult = await qdrantClient.deleteCollection(collectionName);
+      
+      console.log(`✅ [DELETE-DOC-API] Successfully deleted ${collectionName} `);
+      console.log(`🔍 [DELETE-DOC-API] Delete result:`, deleteResult);
+      
+    }  catch (deleteError) {
       console.error('❌ [DOCUMENTS-API] Error clearing vector store:', deleteError);
       throw deleteError;
     }
