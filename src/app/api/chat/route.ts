@@ -7,7 +7,31 @@ export async function POST(request: NextRequest) {
   try {
     const { message, conversationHistory } = await request.json()
     
-    console.log('Received chat message:', message)
+    // Validate input
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Valid message is required' },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize message length
+    if (message.length > 2000) {
+      return NextResponse.json(
+        { success: false, error: 'Message too long. Maximum 2000 characters.' },
+        { status: 400 }
+      );
+    }
+
+    // Validate conversation history
+    if (conversationHistory && (!Array.isArray(conversationHistory) || conversationHistory.length > 20)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid conversation history' },
+        { status: 400 }
+      );
+    }
+    
+    console.log('Received chat message:', message.substring(0, 100))
     console.log('Conversation history length:', conversationHistory?.length || 0)
     
     // Initialize OpenAI and embeddings
@@ -19,12 +43,21 @@ export async function POST(request: NextRequest) {
       model: 'text-embedding-3-large',
     });
     
+    // Validate environment variables
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('❌ [CHAT-API] Missing OPENAI_API_KEY environment variable');
+      return NextResponse.json(
+        { success: false, error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
     // Connect to vector store and search for relevant documents
     const vectorStore = await QdrantVectorStore.fromExistingCollection(
       embeddings,
       {
-        url: 'http://localhost:6333',
-        collectionName: 'chaicode-collection',
+        url: process.env.QDRANT_URL || 'http://localhost:6333',
+        collectionName: process.env.QDRANT_COLLECTION || 'chaicode-collection',
       }
     );
     
