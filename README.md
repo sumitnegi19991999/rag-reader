@@ -53,12 +53,19 @@ QDRANT_COLLECTION=ragReader-collection
    ```bash
    npm install
    ```
-3. Set up environment variables
+3. Set up environment variables (copy `.env.example` to `.env.local`)
 4. Run the development server:
    ```bash
    npm run dev
    ```
 5. Open [http://localhost:3000](http://localhost:3000)
+
+## 🔧 Dependency Management
+
+This project uses specific versions to ensure compatibility:
+- OpenAI v4.62.1 (compatible with LangChain)
+- LangChain v0.3.2 (stable release)
+- Next.js v14.2.32 (security patched)
 
 ## 📦 Production Build
 
